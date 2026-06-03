@@ -1,0 +1,4 @@
+redis==5.2.1
+pydantic==2.10.4
+numpy==2.2.1
+scikit-learn==1.6.0

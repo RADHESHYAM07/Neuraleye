@@ -1,0 +1,89 @@
+{
+  "store_id": "PUR_MUM_001",
+  "camera_resolution": [1280, 720],
+  "zones": [
+    {
+      "id": "entry",
+      "name": "Store Entry",
+      "color": "#00ff88",
+      "polygon": [
+        [0, 600],
+        [250, 600],
+        [250, 720],
+        [0, 720]
+      ],
+      "funnel_order": 1,
+      "alert_dwell_seconds": 30
+    },
+    {
+      "id": "beauty",
+      "name": "Beauty Section",
+      "color": "#ff6b9d",
+      "polygon": [
+        [250, 400],
+        [640, 400],
+        [640, 720],
+        [250, 720]
+      ],
+      "funnel_order": 2,
+      "alert_dwell_seconds": 120
+    },
+    {
+      "id": "skincare",
+      "name": "Skincare Shelf",
+      "color": "#4ecdc4",
+      "polygon": [
+        [640, 300],
+        [960, 300],
+        [960, 720],
+        [640, 720]
+      ],
+      "funnel_order": 3,
+      "alert_dwell_seconds": 180
+    },
+    {
+      "id": "haircare",
+      "name": "Haircare Aisle",
+      "color": "#ffd93d",
+      "polygon": [
+        [0, 200],
+        [640, 200],
+        [640, 400],
+        [0, 400]
+      ],
+      "funnel_order": 4,
+      "alert_dwell_seconds": 120
+    },
+    {
+      "id": "checkout",
+      "name": "Checkout Counter",
+      "color": "#ff6348",
+      "polygon": [
+        [960, 0],
+        [1280, 0],
+        [1280, 720],
+        [960, 720]
+      ],
+      "funnel_order": 5,
+      "alert_dwell_seconds": 300,
+      "is_checkout": true
+    },
+    {
+      "id": "floor",
+      "name": "General Floor",
+      "color": "#a29bfe",
+      "polygon": [
+        [0, 0],
+        [1280, 0],
+        [1280, 200],
+        [0, 200]
+      ],
+      "funnel_order": 0,
+      "alert_dwell_seconds": 600
+    }
+  ],
+  "cameras": [
+    { "id": "cam_01", "name": "Main Floor", "position": "ceiling_center" },
+    { "id": "cam_02", "name": "Checkout", "position": "ceiling_checkout" }
+  ]
+}

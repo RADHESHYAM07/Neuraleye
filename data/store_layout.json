@@ -1,0 +1,24 @@
+{
+    "stores": {
+        "STORE_BLR_002": {
+            "name": "Indiranagar - Store 2",
+            "city": "Bangalore",
+            "open_hours": {"open": "10:00", "close": "22:00"},
+            "cameras": {
+                "CAM_ENTRY_01": {"type": "entry", "angle": "entrance_overhead"},
+                "CAM_ENTRY_02": {"type": "entry", "angle": "entrance_side"},
+                "CAM_FLOOR_01": {"type": "floor", "angle": "ceiling_center"},
+                "CAM_BILLING_01": {"type": "billing", "angle": "billing_counter"}
+            },
+            "zones": {
+                "ENTRY": {"name": "Store Entry", "type": "ENTRY", "camera_ids": ["CAM_ENTRY_01", "CAM_ENTRY_02"]},
+                "SKINCARE": {"name": "Skincare Shelf", "type": "SHELF", "camera_ids": ["CAM_FLOOR_01"]},
+                "HAIRCARE": {"name": "Haircare Aisle", "type": "SHELF", "camera_ids": ["CAM_FLOOR_01"]},
+                "BEAUTY": {"name": "Beauty Section", "type": "DISPLAY", "camera_ids": ["CAM_FLOOR_01"]},
+                "MOISTURISER": {"name": "Moisturiser Display", "type": "SHELF", "camera_ids": ["CAM_FLOOR_01"]},
+                "BILLING": {"name": "Billing Counter", "type": "BILLING", "camera_ids": ["CAM_BILLING_01"]},
+                "FLOOR": {"name": "General Floor", "type": "FLOOR", "camera_ids": ["CAM_FLOOR_01"]}
+            }
+        }
+    }
+}

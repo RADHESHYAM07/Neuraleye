@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuralEye - Store Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f; --card-bg: rgba(255, 255, 255, 0.04); --card-border: rgba(255, 255, 255, 0.08);
+            --accent: #00d4aa; --accent-glow: rgba(0, 212, 170, 0.2); --warn: #f59e0b; --crit: #ef4444;
+            --text-main: #f0f0f5; --text-muted: rgba(240, 240, 245, 0.5); --font: 'Inter', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+        .bg-glow { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.15; pointer-events: none; }
+        .glow-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #00d4aa; }
+        .glow-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #7c3aed; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; flex-direction: column; gap: 2rem; }
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--card-border); }
+        .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 0.5rem; }
+        .logo span { background: linear-gradient(135deg, #00d4aa, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); background: var(--card-bg); padding: 0.5rem 1rem; border-radius: 2rem; border: 1px solid var(--card-border); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--crit); transition: all 0.3s ease; }
+        .dot.live { background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.5rem; backdrop-filter: blur(12px); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .kpi-label { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .kpi-val { font-size: 2.5rem; font-weight: 700; color: #fff; display: flex; align-items: baseline; gap: 0.25rem; }
+        .kpi-val.highlight { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        .kpi-sub { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem; }
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+        .section-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+        .funnel-stage { display: grid; grid-template-columns: 120px 1fr 60px; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .funnel-label { font-size: 0.875rem; color: var(--text-muted); }
+        .funnel-bar-wrapper { background: rgba(255,255,255,0.05); height: 24px; border-radius: 12px; overflow: hidden; position: relative; }
+        .funnel-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #00d4aa); border-radius: 12px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); min-width: 4px; }
+        .funnel-val { font-weight: 600; text-align: right; font-size: 0.875rem; }
+        .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+        .zone-card { border-radius: 0.75rem; padding: 1.25rem; position: relative; overflow: hidden; border: 1px solid var(--card-border); transition: all 0.3s ease; }
+        .zone-bg { position: absolute; inset: 0; background: var(--accent); opacity: 0.05; z-index: 0; transition: opacity 1s ease; }
+        .zone-content { position: relative; z-index: 1; }
+        .zone-name { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase;}
+        .zone-val { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .zone-dwell { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .anomaly-list { display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; overflow-y: auto; padding-right: 0.5rem; }
+        .anomaly-item { padding: 1rem; border-radius: 0.75rem; background: rgba(255,255,255,0.02); border-left: 4px solid var(--card-border); animation: slideIn 0.3s ease; }
+        .anomaly-item.CRITICAL { border-left-color: var(--crit); background: rgba(239, 68, 68, 0.05); }
+        .anomaly-item.WARN { border-left-color: var(--warn); background: rgba(245, 158, 11, 0.05); }
+        .anomaly-item.INFO { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .anomaly-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .anomaly-type { font-weight: 600; font-size: 0.875rem; }
+        .anomaly-time { font-size: 0.75rem; color: var(--text-muted); }
+        .anomaly-action { font-size: 0.875rem; color: var(--text-muted); line-height: 1.4; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00d4aa" /><stop offset="100%" stop-color="#3b82f6" /></linearGradient></defs>
+                    <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" /><circle cx="12" cy="12" r="3" />
+                </svg>
+                Neural<span>Eye</span>
+            </div>
+            <div class="status">
+                <div class="dot" id="status-dot"></div>
+                <span id="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="kpi-grid">
+            <div class="card"><div class="kpi-label">Unique Visitors</div><div class="kpi-val highlight" id="kpi-visitors">-</div><div class="kpi-sub">Today</div></div>
+            <div class="card"><div class="kpi-label">Conversion Rate</div><div class="kpi-val" id="kpi-conv">-</div><div class="kpi-sub">Purchases / Visitors</div></div>
+            <div class="card"><div class="kpi-label">Current Queue</div><div class="kpi-val" id="kpi-queue">-</div><div class="kpi-sub">People waiting</div></div>
+            <div class="card"><div class="kpi-label">Abandonment Rate</div><div class="kpi-val" id="kpi-abandon">-</div><div class="kpi-sub">Queue drop-offs</div></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <div class="section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Zone Heatmap
+                </div>
+                <div class="heatmap-grid" id="heatmap-container"><div style="color: var(--text-muted); font-size: 0.875rem;">Loading zone data...</div></div>
+            </div>
+
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    Conversion Funnel
+                </div>
+                <div id="funnel-container" style="flex: 1; display: flex; flex-direction: column; justify-content: center;"><div style="color: var(--text-muted); font-size: 0.875rem;">Loading funnel...</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title" style="margin-bottom: 1rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Active Anomalies
+            </div>
+            <div class="anomaly-list" id="anomaly-container"><div style="color: var(--text-muted); font-size: 0.875rem;">No active anomalies detected.</div></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+        const STORE_ID = "STORE_BLR_002";
+        const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
+        const formatPercent = (num) => `${(num * 100).toFixed(1)}%`;
+        const formatTime = (isoString) => new Date(isoString).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        const dot = document.getElementById("status-dot");
+        const statusText = document.getElementById("status-text");
+
+        function setStatus(live) {
+            if (live) { dot.classList.add("live"); statusText.textContent = "Live"; }
+            else { dot.classList.remove("live"); statusText.textContent = "Offline"; }
+        }
+
+        async function fetchMetrics() {
+            try {
+                const res = await fetch(`${API_URL}/stores/${STORE_ID}/metrics`);
+                const data = await res.json();
+                document.getElementById('kpi-visitors').textContent = formatNumber(data.unique_visitors);
+                document.getElementById('kpi-conv').textContent = formatPercent(data.conversion_rate);
+                document.getElementById('kpi-queue').textContent = data.current_queue_depth;
+                document.getElementById('kpi-abandon').textContent = formatPercent(data.abandonment_rate);
+                setStatus(true);
+            } catch (e) { setStatus(false); }
+        }
+
+        async function fetchHeatmap() {
+            try {
+                const res = await fetch(`${API_URL}/stores/${STORE_ID}/heatmap`);
+                const data = await res.json();
+                const container = document.getElementById('heatmap-container');
+                if (data.zones && data.zones.length > 0) {
+                    container.innerHTML = data.zones.map(z => `
+                        <div class="zone-card">
+                            <div class="zone-bg" style="opacity: ${Math.max(0.05, z.intensity / 100 * 0.4)}"></div>
+                            <div class="zone-content">
+                                <div class="zone-name" style="color: ${z.intensity > 80 ? 'var(--accent)' : 'var(--text-muted)'}">${z.zone_id}</div>
+                                <div class="zone-val">${formatNumber(z.visit_count)}</div>
+                                <div class="zone-dwell">Avg ${Math.round(z.avg_dwell_ms / 1000)}s</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {}
+        }
+
+        async function fetchFunnel() {
+            try {
+                const res = await fetch(`${API_URL}/stores/${STORE_ID}/funnel`);
+                const data = await res.json();
+                const container = document.getElementById('funnel-container');
+                if (data.stages && data.stages.length > 0) {
+                    const maxVisitors = Math.max(...data.stages.map(s => s.visitors), 1);
+                    container.innerHTML = data.stages.map(s => {
+                        const width = Math.max(4, (s.visitors / maxVisitors) * 100);
+                        return `
+                        <div class="funnel-stage">
+                            <div class="funnel-label">${s.stage}</div>
+                            <div class="funnel-bar-wrapper"><div class="funnel-bar" style="width: ${width}%"></div></div>
+                            <div class="funnel-val">${formatNumber(s.visitors)}</div>
+                        </div>
+                    `}).join('');
+                }
+            } catch (e) {}
+        }
+
+        async function fetchAnomalies() {
+            try {
+                const res = await fetch(`${API_URL}/stores/${STORE_ID}/anomalies`);
+                const data = await res.json();
+                const container = document.getElementById('anomaly-container');
+                if (data.active_anomalies && data.active_anomalies.length > 0) {
+                    container.innerHTML = data.active_anomalies.map(a => `
+                        <div class="anomaly-item ${a.severity}">
+                            <div class="anomaly-header"><span class="anomaly-type">${a.type.replace(/_/g, ' ')}</span><span class="anomaly-time">${formatTime(a.detected_at)}</span></div>
+                            <div class="anomaly-action">${a.suggested_action}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.875rem; padding: 1rem;">No active anomalies detected. Operations are normal.</div>`;
+                }
+            } catch (e) {}
+        }
+
+        function pollData() { fetchMetrics(); fetchHeatmap(); fetchFunnel(); fetchAnomalies(); }
+        pollData(); setInterval(pollData, 5000);
+    </script>
+</body>
+</html>

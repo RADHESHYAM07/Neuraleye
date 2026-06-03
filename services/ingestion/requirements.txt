@@ -1,0 +1,7 @@
+numpy==2.2.1
+redis==5.2.1
+pydantic==2.10.4
+shapely==2.0.6
+ultralytics>=8.1.0
+opencv-python-headless>=4.9.0
+lapx>=0.5.5
